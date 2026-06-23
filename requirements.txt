@@ -1,9 +1,8 @@
-# 必装依赖
+# ScrapePhantom 依赖
+# 安装方式: pip install -e .  (推荐，自动安装全部依赖)
+# 或手动: pip install requests curl_cffi nodriver "scrapling[all]"
+
 requests>=2.28.0
 curl_cffi>=0.5.0
-
-# 可选依赖：反检测浏览器
-# nodriver>=0.30
-
-# 可选依赖：自适应爬虫
-# scrapling[all]>=0.2.0
+nodriver>=0.30
+scrapling[all]>=0.2.0

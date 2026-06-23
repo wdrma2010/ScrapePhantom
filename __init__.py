@@ -1,11 +1,11 @@
 """
-SmartScraper - 智能爬虫调度框架
-根据任务复杂度自动选择最优爬虫工具
+ScrapePhantom - 智能爬虫调度框架
+自动选择最优爬虫工具，绕过反爬保护
 """
 from .core.scheduler import SmartScheduler
 from .tools.base import ScrapeResult
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __all__ = ["SmartScheduler", "ScrapeResult", "smart_scrape"]
 
 _scheduler = None

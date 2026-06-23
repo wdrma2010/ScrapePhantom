@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "scrapephantom"
+version = "1.1.0"
+description = "智能爬虫调度框架 - 自动选择最优爬虫工具，绕过反爬保护"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "wdrma"}
+]
+keywords = ["scraper", "crawler", "anti-bot", "cloudflare", "scraping"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "requests>=2.28.0",
+    "curl_cffi>=0.5.0",
+    "nodriver>=0.30",
+    "scrapling[all]>=0.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]
+
+[project.urls]
+Homepage = "https://github.com/wdrma2010/ScrapePhantom"
+Repository = "https://github.com/wdrma2010/ScrapePhantom"
+Issues = "https://github.com/wdrma2010/ScrapePhantom/issues"
+
+[tool.setuptools.packages.find]
+include = ["smart_scraper*"]

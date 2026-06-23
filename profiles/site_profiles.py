@@ -6,118 +6,37 @@ class SiteProfiles:
     """管理已知网站的特征信息"""
     
     PROFILES: Dict[str, Dict[str, Any]] = {
-        # === 赔率网站 ===
-        "oddschecker.com": {
-            "has_cloudflare": True,
-            "js_rendered": True,
-            "anti_scraping": True,
-            "required_capabilities": ["anti_bot", "js_render"],
-            "recommended_tool": "nodriver",
-        },
-        "odds-api.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        "bet365.com": {
-            "has_cloudflare": True,
-            "js_rendered": True,
-            "anti_scraping": True,
-            "required_capabilities": ["anti_bot", "js_render"],
-            "recommended_tool": "nodriver",
-        },
-        
-        # === 足球数据网站 ===
-        "rotowire.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        "flashscore.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "anti_scraping": False,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "scrapling",
-        },
-        "sofascore.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "anti_scraping": False,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "scrapling",
-        },
-        "fbref.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        "transfermarkt.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "anti_scraping": True,
-            "required_capabilities": ["tls_fingerprint"],
-            "recommended_tool": "curl_cffi",
-        },
-        "football-data.co.uk": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        "understat.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "scrapling",
-        },
-        
-        # === ESPN (免费) ===
-        "espn.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        "site.api.espn.com": {
-            "has_cloudflare": False,
-            "js_rendered": False,
-            "required_capabilities": [],
-            "recommended_tool": "requests",
-        },
-        
-        # === 中国竞彩网站 ===
-        "sporttery.cn": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "requires_login": False,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "nodriver",
-        },
-        "500.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "nodriver",
-        },
-        "zgzcw.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "nodriver",
-        },
-        "okooo.com": {
-            "has_cloudflare": False,
-            "js_rendered": True,
-            "required_capabilities": ["js_render"],
-            "recommended_tool": "nodriver",
-        },
-        
-        # === 其他 ===
+        # === 通用网站 ===
         "github.com": {
+            "has_cloudflare": False,
+            "js_rendered": False,
+            "required_capabilities": [],
+            "recommended_tool": "requests",
+        },
+        "stackoverflow.com": {
+            "has_cloudflare": False,
+            "js_rendered": False,
+            "required_capabilities": [],
+            "recommended_tool": "requests",
+        },
+        "wikipedia.org": {
+            "has_cloudflare": False,
+            "js_rendered": False,
+            "required_capabilities": [],
+            "recommended_tool": "requests",
+        },
+        
+        # === Cloudflare 保护站点 ===
+        "cloudflare.com": {
+            "has_cloudflare": True,
+            "js_rendered": True,
+            "anti_scraping": True,
+            "required_capabilities": ["anti_bot", "js_render"],
+            "recommended_tool": "nodriver",
+        },
+        
+        # === 数据 API ===
+        "api.github.com": {
             "has_cloudflare": False,
             "js_rendered": False,
             "required_capabilities": [],
