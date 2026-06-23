@@ -1,6 +1,5 @@
 """Nodriver 工具 - 终极反爬武器，直接驱动Chrome"""
 import time
-import smart_scraper.vendor  # noqa: F401 - 加载 vendor 路径
 from .base import BaseTool, ScrapeResult
 from ..config import DEFAULT_TIMEOUT
 
@@ -60,7 +59,6 @@ class NodriverTool(BaseTool):
     
     async def check_availability(self) -> bool:
         try:
-            import smart_scraper.vendor  # noqa: F401
             import nodriver
             return True
         except ImportError:

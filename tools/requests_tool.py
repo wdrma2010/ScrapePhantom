@@ -1,6 +1,5 @@
 """Requests 工具 - 最轻量，适合静态页面"""
 import time
-import smart_scraper.vendor  # noqa: F401 - 加载 vendor 路径
 import requests as req
 from .base import BaseTool, ScrapeResult
 from ..config import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT
@@ -40,7 +39,6 @@ class RequestsTool(BaseTool):
     
     async def check_availability(self) -> bool:
         try:
-            import smart_scraper.vendor  # noqa: F401
             import requests
             return True
         except ImportError:

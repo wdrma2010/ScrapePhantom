@@ -1,6 +1,5 @@
 """CurlCffi 工具 - TLS指纹伪装，绕过基础反爬"""
 import time
-import smart_scraper.vendor  # noqa: F401 - 加载 vendor 路径
 from .base import BaseTool, ScrapeResult
 from ..config import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT
 
@@ -55,7 +54,6 @@ class CurlCffiTool(BaseTool):
     
     async def check_availability(self) -> bool:
         try:
-            import smart_scraper.vendor  # noqa: F401
             from curl_cffi import requests
             return True
         except ImportError:

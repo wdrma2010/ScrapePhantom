@@ -1,3 +1,8 @@
 # ScrapePhantom 依赖
-# 全部内置在 vendor 目录，无需额外安装
-# 直接使用: pip install -e . 或 pip install scrapephantom
+# 用户安装时 pip 自动从 PyPI 拉取最新兼容版本
+# 使用方式: pip install -e .
+
+requests>=2.28.0
+curl_cffi>=0.5.0
+nodriver>=0.30
+scrapling[all]>=0.2.0
