@@ -1,5 +1,6 @@
 """Scrapling 工具 - 自适应爬虫，页面变化容忍"""
 import time
+import smart_scraper.vendor  # noqa: F401 - 加载 vendor 路径
 from .base import BaseTool, ScrapeResult
 from ..config import DEFAULT_TIMEOUT
 
@@ -55,6 +56,7 @@ class ScraplingTool(BaseTool):
     
     async def check_availability(self) -> bool:
         try:
+            import smart_scraper.vendor  # noqa: F401
             from scrapling.fetchers import Fetcher
             return True
         except ImportError:

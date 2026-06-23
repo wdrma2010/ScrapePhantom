@@ -4,15 +4,15 @@ build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
 name = "scrapephantom"
-version = "1.1.0"
-description = "智能爬虫调度框架 - 自动选择最优爬虫工具，绕过反爬保护"
+version = "1.2.0"
+description = "智能爬虫调度框架 - 自动选择最优爬虫工具，绕过反爬保护（内置全部依赖）"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
     {name = "wdrma"}
 ]
-keywords = ["scraper", "crawler", "anti-bot", "cloudflare", "scraping"]
+keywords = ["scraper", "crawler", "anti-bot", "cloudflare", "scraping", "vendor"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -25,12 +25,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-dependencies = [
-    "requests>=2.28.0",
-    "curl_cffi>=0.5.0",
-    "nodriver>=0.30",
-    "scrapling[all]>=0.2.0",
-]
+# 无外部依赖 - 全部内置在 vendor 目录
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
