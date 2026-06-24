@@ -136,7 +136,22 @@ pip install -e ".[core]"
 
 ## 快速开始
 
-### 一行代码使用
+### 同步调用（推荐）
+
+```python
+from smart_scraper import scrape
+
+result = scrape("https://example.com")
+
+if result.success:
+    print(f"成功！使用工具: {result.tool_used}")
+    print(f"耗时: {result.duration:.2f}s")
+    print(f"内容长度: {len(result.content)} 字节")
+else:
+    print(f"失败: {result.error}")
+```
+
+### 异步调用
 
 ```python
 import asyncio
@@ -205,13 +220,13 @@ scheduler.register_tool(MyCustomTool())
 
 ```
 scrapephantom/
-├── __init__.py              # 入口：smart_scrape() 一行调用
+├── __init__.py              # 入口：scrape() 同步 / smart_scrape() 异步
 ├── config.py                # 全局配置
 ├── pyproject.toml           # 打包配置
 ├── core/
 │   ├── scheduler.py         # 智能调度器（核心）
 │   ├── analyzer.py          # 网站特征分析器
-│   └── fallback.py          # 降级策略引擎
+│   └── fallback.py          # 并行竞争引擎
 ├── tools/
 │   ├── base.py              # 工具基类（统一接口）
 │   ├── requests_tool.py     # 轻量级 HTTP
@@ -253,18 +268,17 @@ scrapephantom/
               │
               ▼
 ┌─────────────────────────────┐
-│  3. 选择最优工具            │
-│  ├── 静态页 → requests      │
-│  ├── TLS检测 → curl_cffi   │
-│  ├── Cloudflare → nodriver  │
-│  └── 动态/改版 → scrapling  │
+│  3. 并行竞争                │
+│  ├── 同时启动 4 个工具      │
+│  ├── 谁先成功 → 立即采纳    │
+│  └── 其他工具自动取消       │
 └─────────────┬───────────────┘
               │
               ▼
 ┌─────────────────────────────┐
-│  4. 执行 + 降级             │
+│  4. 结果处理                │
 │  ├── 成功 → 缓存 + 返回     │
-│  └── 失败 → 自动切换下一工具 │
+│  └── 全部失败 → 返回错误    │
 └─────────────────────────────┘
 ```
 
@@ -285,6 +299,41 @@ DEFAULT_TIMEOUT = 15        # 默认超时（秒）
 # 代理配置
 PROXY_ENABLED = False       # 是否启用代理
 PROXY_LIST = []             # 代理列表
+```
+
+---
+
+## Agent 集成指南
+
+### 智能触发规则
+
+当内置抓取工具遇到以下情况时，自动调用 ScrapePhantom 重试：
+
+1. 内置抓取工具返回错误或失败
+2. 抓取超时
+3. 内容不完整或被截断
+4. 需要绕过反爬保护（Cloudflare、DataDome等）
+5. 需要渲染 JavaScript 动态内容
+6. HTTP 状态码异常（403、429、503等）
+7. 返回内容为空或格式异常
+
+### 集成模板
+
+```python
+from smart_scraper import scrape
+
+# 方式1：直接替换内置工具
+def fetch_url(url):
+    result = scrape(url, timeout=15)
+    return result.content if result.success else None
+
+# 方式2：作为降级备选
+def fetch_with_fallback(url):
+    try:
+        return 内置工具.fetch(url)
+    except:
+        result = scrape(url)  # 自动降级
+        return result.content if result.success else None
 ```
 
 ---
