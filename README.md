@@ -15,6 +15,40 @@
 
 ---
 
+## 一键安装（30秒完成）
+
+### Windows
+
+```cmd
+git clone https://github.com/wdrma2010/ScrapePhantom.git
+cd ScrapePhantom
+install.bat
+```
+
+或 PowerShell：
+```powershell
+git clone https://github.com/wdrma2010/ScrapePhantom.git
+cd ScrapePhantom
+.\install.ps1
+```
+
+### Linux / Mac
+
+```bash
+git clone https://github.com/wdrma2010/ScrapePhantom.git
+cd ScrapePhantom
+chmod +x install.sh
+./install.sh
+```
+
+**安装脚本会自动：**
+1. ✅ 检查 Python 环境
+2. ✅ 安装 ScrapePhantom 和所有依赖
+3. ✅ 检测你的 Agent 类型
+4. ✅ 自动配置技能到正确位置
+
+---
+
 ## 核心特色
 
 ### 1. 并行竞争（不是串行降级）
