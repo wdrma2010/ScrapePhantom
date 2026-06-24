@@ -7,6 +7,14 @@
 
 ---
 
+## About
+
+**中文：** 幽灵爬虫 - 智能爬虫调度框架，自动选择最优工具绕过反爬保护。四个工具并行竞争，谁先抓到用谁。
+
+**English:** ScrapePhantom - Intelligent web scraping framework that automatically selects the optimal tool to bypass anti-bot protection. Four tools compete in parallel, the fastest winner is used.
+
+---
+
 ## 一句话定位
 
 **ScrapePhantom 是什么？**

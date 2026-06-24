@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scrapephantom"
 version = "1.2.0"
-description = "智能爬虫调度框架 - 自动选择最优爬虫工具，绕过反爬保护"
+description = "ScrapePhantom - 智能爬虫调度框架，自动选择最优工具绕过反爬保护 / Intelligent scraping framework with auto tool selection"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
