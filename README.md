@@ -223,6 +223,7 @@ scrapephantom/
 ├── __init__.py              # 入口：scrape() 同步 / smart_scrape() 异步
 ├── config.py                # 全局配置
 ├── pyproject.toml           # 打包配置
+├── SKILL.md                 # OpenCode 技能配置
 ├── core/
 │   ├── scheduler.py         # 智能调度器（核心）
 │   ├── analyzer.py          # 网站特征分析器
@@ -233,6 +234,10 @@ scrapephantom/
 │   ├── curl_cffi_tool.py    # TLS 指纹伪装
 │   ├── nodriver_tool.py     # 终极反爬武器
 │   └── scrapling_tool.py    # 自适应爬虫
+├── agent_hub/               # Agent 智能集成
+│   ├── detector.py          # 检测 Agent 和内置工具
+│   ├── configurator.py      # 自动配置技能
+│   └── cli.py               # 命令行工具
 ├── profiles/
 │   ├── site_profiles.py     # 预定义网站特征库
 │   └── user_agents.py       # 真实 UA 池
@@ -305,6 +310,25 @@ PROXY_LIST = []             # 代理列表
 
 ## Agent 集成指南
 
+### 一键自动配置（推荐）
+
+```bash
+# 检测当前 Agent 和内置抓取工具
+python -m smart_scraper.agent_hub detect
+
+# 自动配置技能（支持 OpenCode/Claude/Cursor）
+python -m smart_scraper.agent_hub configure
+
+# 查看配置状态
+python -m smart_scraper.agent_hub status
+```
+
+**自动配置会：**
+1. 检测你的 Agent 类型（OpenCode/Claude/Cursor/其他）
+2. 检测内置抓取工具（requests/httpx/aiohttp 等）
+3. 自动生成对应的技能配置
+4. 部署到正确位置
+
 ### 智能触发规则
 
 当内置抓取工具遇到以下情况时，自动调用 ScrapePhantom 重试：
@@ -317,7 +341,7 @@ PROXY_LIST = []             # 代理列表
 6. HTTP 状态码异常（403、429、503等）
 7. 返回内容为空或格式异常
 
-### 集成方式
+### 手动集成
 
 #### 方式1：直接替换内置工具
 
@@ -346,27 +370,15 @@ def fetch_with_fallback(url):
 
 #### OpenCode
 
-将 `SKILL.md` 复制到技能目录：
+自动配置会将 SKILL.md 放到 `~/.config/opencode/skills/scrapephantom/`。
 
-```bash
-# Windows
-copy SKILL.md %USERPROFILE%\.config\opencode\skills\scrapephantom\SKILL.md
+#### Claude / Cursor
 
-# Linux/Mac
-cp SKILL.md ~/.config/opencode/skills/scrapephantom/SKILL.md
-```
+自动配置会修改 MCP 配置文件，注册 Scrapephantom 服务。
 
 #### 其他 Agent
 
-参考 `SKILL.md` 中的智能触发规则，在你的 Agent 工具调用逻辑中加入降级规则：
-
-```
-伪代码：
-try:
-    result = 内置工具.fetch(url)
-except 失败/超时:
-    result = scrape(url)  # 自动降级到 ScrapePhantom
-```
+参考 `SKILL.md` 中的触发规则，在你的 Agent 工具调用逻辑中加入降级规则。
 
 ---
 
