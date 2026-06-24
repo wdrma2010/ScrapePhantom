@@ -317,23 +317,55 @@ PROXY_LIST = []             # 代理列表
 6. HTTP 状态码异常（403、429、503等）
 7. 返回内容为空或格式异常
 
-### 集成模板
+### 集成方式
+
+#### 方式1：直接替换内置工具
 
 ```python
 from smart_scraper import scrape
 
-# 方式1：直接替换内置工具
 def fetch_url(url):
     result = scrape(url, timeout=15)
     return result.content if result.success else None
+```
 
-# 方式2：作为降级备选
+#### 方式2：作为降级备选
+
+```python
+from smart_scraper import scrape
+
 def fetch_with_fallback(url):
     try:
         return 内置工具.fetch(url)
     except:
         result = scrape(url)  # 自动降级
         return result.content if result.success else None
+```
+
+### 不同 Agent 配置
+
+#### OpenCode
+
+将 `SKILL.md` 复制到技能目录：
+
+```bash
+# Windows
+copy SKILL.md %USERPROFILE%\.config\opencode\skills\scrapephantom\SKILL.md
+
+# Linux/Mac
+cp SKILL.md ~/.config/opencode/skills/scrapephantom/SKILL.md
+```
+
+#### 其他 Agent
+
+参考 `SKILL.md` 中的智能触发规则，在你的 Agent 工具调用逻辑中加入降级规则：
+
+```
+伪代码：
+try:
+    result = 内置工具.fetch(url)
+except 失败/超时:
+    result = scrape(url)  # 自动降级到 ScrapePhantom
 ```
 
 ---
