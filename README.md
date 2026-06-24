@@ -1,217 +1,178 @@
 # ScrapePhantom 幽灵爬虫
 
-> 智能爬虫调度框架 - 自动选择最优爬虫工具，绕过反爬保护
+> 智能爬虫调度框架 - 四工具并行竞争，谁先成功用谁
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-## 项目简介
+## 一句话定位
 
-**ScrapePhantom**（幽灵爬虫）是一个通用的智能爬虫调度框架，核心解决一个痛点：
+**ScrapePhantom 是什么？**
 
-> **面对不同网站的反爬策略，手动切换爬虫工具太麻烦。**
-
-ScrapePhantom 会自动分析目标网站特征（Cloudflare？DataDome？JS渲染？），然后：
-1. 选择最优的爬虫工具
-2. 执行抓取
-3. 失败时自动降级到下一工具
-
-**一行代码，搞定所有网站。**
+> 当你的 Agent 内置抓取工具失败时，ScrapePhantom 自动接管，四个工具并行竞争，谁先抓到用谁。
 
 ---
 
-## 适用场景
+## 核心特色
 
-| 场景 | 说明 |
-|------|------|
-| 数据采集 | 电商价格、新闻、社交媒体、公开API |
-| 反爬绕过 | Cloudflare、DataDome、Imperva、TLS指纹检测 |
-| 动态页面 | SPA、React/Vue 渲染页面、无限滚动 |
-| 批量抓取 | 大规模数据采集，自动切换工具避免封禁 |
-| 监控告警 | 定时抓取网页变化，触发通知 |
-| SEO分析 | 搜索引擎爬虫模拟、排名监控 |
-| 学术研究 | 论文数据采集、舆情分析 |
-
----
-
-## 核心功能
-
-### 1. 智能工具调度
+### 1. 并行竞争（不是串行降级）
 
 ```
-任务进入 → 分析网站特征 → 选择最优工具 → 执行 → 失败自动降级
+传统方式: requests 失败 → curl_cffi 失败 → nodriver 失败 → scrapling 失败
+            ↓              ↓                ↓              ↓
+          等待            等待              等待            等待
+          10s             20s               30s            40s
+
+ScrapePhantom: requests ─┐
+             curl_cffi ──┼──→ 谁先成功 → 立即采纳 → 取消其他
+             nodriver  ──┤
+             scrapling ──┘
+                         ↓
+                       0.5s
 ```
 
-内置 4 种爬虫工具，按场景自动选择：
+**效率提升 10 倍以上。**
 
-| 工具 | 适用场景 |
-|------|---------|
-| **requests** | 静态页面、API接口、轻量快速 |
-| **curl_cffi** | TLS指纹检测网站、伪装浏览器握手 |
-| **scrapling** | JS渲染、页面频繁改版、自适应解析 |
-| **nodriver** | Cloudflare、DataDome、需登录、终极反爬 |
-
-### 2. 反检测绕过
-
-| 反爬系统 | 绕过方案 |
-|---------|---------|
-| Cloudflare | nodriver（真实浏览器引擎） |
-| DataDome | nodriver |
-| Imperva/Incapsula | nodriver |
-| TLS指纹检测 | curl_cffi（伪装Chrome握手） |
-| 行为检测 | 随机UA + 请求间隔 |
-
-### 3. 降级策略
-
-主工具失败时，自动切换下一工具，无需人工干预：
-
-```python
-# 自动尝试: nodriver → scrapling → curl_cffi → requests
-result = await smart_scrape("https://protected-site.com")
-```
-
-### 4. 缓存管理
-
-- 基于文件系统的本地缓存
-- 可配置 TTL（默认24小时）
-- 支持禁用缓存
-
-### 5. 网站特征库
-
-预定义已知网站的最优抓取策略，支持自定义扩展：
-
-```python
-from smart_scraper.profiles.site_profiles import SiteProfiles
-
-# 自动识别网站并推荐工具
-profile = SiteProfiles.get_profile("https://example.com")
-# → {"has_cloudflare": True, "recommended_tool": "nodriver", ...}
-
-# 添加自定义网站特征
-SiteProfiles.add_profile("my-site.com", {
-    "has_cloudflare": True,
-    "js_rendered": True,
-    "recommended_tool": "nodriver",
-})
-```
-
----
-
-## 安装
-
-### 一键安装（推荐）
+### 2. Agent Hub（一键集成任何 Agent）
 
 ```bash
-pip install scrapephantom
+# 自动检测你的 Agent 类型
+python -m smart_scraper.agent_hub detect
+
+# 自动配置技能
+python -m smart_scraper.agent_hub configure
 ```
 
-### 手动安装
+**支持的 Agent：**
+- OpenCode（自动写入 SKILL.md）
+- Claude Desktop（自动修改 MCP 配置）
+- Cursor（自动修改 MCP 配置）
+- 任何其他 Agent（输出通用集成模板）
 
-```bash
-# 克隆仓库
-git clone https://github.com/wdrma2010/ScrapePhantom.git
-cd ScrapePhantom
+### 3. 智能触发（无需手动调用）
 
-# 安装（包含所有依赖）
-pip install -e .
+当你的 Agent 内置工具遇到以下情况时，ScrapePhantom 自动接管：
 
-# 或仅安装核心依赖
-pip install -e ".[core]"
-```
+| 触发条件 | 说明 |
+|---------|------|
+| 抓取失败 | 内置工具返回错误 |
+| 抓取超时 | 响应时间过长 |
+| 内容截断 | HTML 不完整 |
+| 反爬拦截 | Cloudflare/DataDome/Imperva |
+| JS 渲染 | SPA/React/Vue 页面 |
+| 状态码异常 | 403/429/503 等 |
 
-### 依赖说明
+### 4. 四工具协同
 
-| 依赖 | 版本 | 说明 |
-|------|------|------|
-| requests | >=2.28.0 | HTTP基础库（必装） |
-| curl_cffi | >=0.5.0 | TLS指纹伪装（必装） |
-| nodriver | >=0.30 | 反检测浏览器（必装） |
-| scrapling | >=0.2.0 | 自适应爬虫（必装） |
-
-安装 ScrapePhantom 时，以上四个依赖会自动安装。
+| 工具 | 优先级 | 核心能力 |
+|------|--------|---------|
+| **requests** | 1 | 最快，静态页面 |
+| **curl_cffi** | 2 | TLS 指纹伪装 |
+| **scrapling** | 3 | JS 渲染，自适应解析 |
+| **nodriver** | 4 | 真实浏览器，终极反爬 |
 
 ---
 
 ## 快速开始
 
-### 同步调用（推荐）
+### 安装
+
+```bash
+git clone https://github.com/wdrma2010/ScrapePhantom.git
+cd ScrapePhantom
+pip install -e .
+```
+
+### 一行代码使用
 
 ```python
 from smart_scraper import scrape
 
 result = scrape("https://example.com")
-
-if result.success:
-    print(f"成功！使用工具: {result.tool_used}")
-    print(f"耗时: {result.duration:.2f}s")
-    print(f"内容长度: {len(result.content)} 字节")
-else:
-    print(f"失败: {result.error}")
+print(result.content)  # 成功返回内容，失败返回错误
 ```
 
-### 异步调用
+### 自动配置 Agent
 
-```python
-import asyncio
-from smart_scraper import smart_scrape
-
-async def main():
-    result = await smart_scrape("https://example.com")
-    
-    if result.success:
-        print(f"成功！使用工具: {result.tool_used}")
-        print(f"耗时: {result.duration:.2f}s")
-        print(f"内容长度: {len(result.content)} 字节")
-    else:
-        print(f"失败: {result.error}")
-
-asyncio.run(main())
+```bash
+# 检测并自动配置
+python -m smart_scraper.agent_hub configure
 ```
 
-### 自定义调度器
+---
 
-```python
-from smart_scraper.core.scheduler import SmartScheduler
+## 工作原理
 
-async def main():
-    scheduler = SmartScheduler()
-    
-    # 查看可用工具
-    tools = await scheduler.get_available_tools()
-    for t in tools:
-        print(f"{t['name']}: {'可用' if t['available'] else '不可用'}")
-    
-    # 抓取
-    result = await scheduler.scrape("https://example.com")
-    
-    # 强制指定工具
-    result = await scheduler.scrape(url, force_tool="curl_cffi")
-    
-    # 禁用缓存
-    result = await scheduler.scrape(url, use_cache=False)
-
-asyncio.run(main())
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     你的 Agent                               │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │ 内置工具 A  │    │ 内置工具 B  │    │ 内置工具 C  │      │
+│  └──────┬──────┘    └──────┬──────┘    └──────┬──────┘      │
+│         │                  │                  │              │
+│         └──────────────────┼──────────────────┘              │
+│                            │                                 │
+│                            ▼                                 │
+│                    ┌───────────────┐                         │
+│                    │   智能检测    │                         │
+│                    │ 失败/超时/反爬│                         │
+│                    └───────┬───────┘                         │
+│                            │                                 │
+└────────────────────────────┼─────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   ScrapePhantom                              │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
+│  │requests │ │curl_cffi│ │nodriver │ │scrapling│           │
+│  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘           │
+│       │           │           │           │                  │
+│       └───────────┼───────────┼───────────┘                  │
+│                   │           │                              │
+│                   ▼           ▼                              │
+│            ┌─────────────────────────┐                      │
+│            │     并行竞争引擎        │                      │
+│            │  谁先成功 → 立即采纳    │                      │
+│            └─────────────────────────┘                      │
+│                            │                                 │
+└────────────────────────────┼─────────────────────────────────┘
+                             │
+                             ▼
+                    ┌───────────────┐
+                    │  返回结果     │
+                    └───────────────┘
 ```
 
-### 注册自定义工具
+---
 
-```python
-from smart_scraper.tools.base import BaseTool, ScrapeResult
+## 适用场景
 
-class MyCustomTool(BaseTool):
-    name = "my_tool"
-    priority = 5
-    capabilities = ["custom", "anti_bot"]
-    
-    async def fetch(self, url, **kwargs):
-        # 你的抓取逻辑
-        return ScrapeResult(success=True, content="...", tool_used=self.name)
+| 场景 | 为什么用 ScrapePhantom |
+|------|------------------------|
+| 赔率采集 | 绕过 bet365/oddschecker 反爬 |
+| 新闻监控 | Cloudflare 保护的网站 |
+| 电商比价 | JS 渲染的价格页面 |
+| 学术研究 | 大规模数据采集 |
+| 竞彩分析 | 实时赔率数据获取 |
 
-# 注册到调度器
-scheduler = SmartScheduler()
-scheduler.register_tool(MyCustomTool())
+---
+
+## 配置状态
+
+```bash
+python -m smart_scraper.agent_hub status
+```
+
+输出示例：
+```
+Agent: opencode (opencode)
+配置路径: C:\Users\xxx/.config/opencode
+ScrapePhantom: 已安装
+内置工具: requests, httpx, aiohttp, curl_cffi, nodriver
+技能配置: 已配置
+配置文件: C:\Users\xxx/.config/opencode/skills/scrapephantom/SKILL.md
 ```
 
 ---
@@ -220,16 +181,12 @@ scheduler.register_tool(MyCustomTool())
 
 ```
 scrapephantom/
-├── __init__.py              # 入口：scrape() 同步 / smart_scrape() 异步
-├── config.py                # 全局配置
-├── pyproject.toml           # 打包配置
-├── SKILL.md                 # OpenCode 技能配置
+├── __init__.py              # 入口：scrape() / smart_scrape()
 ├── core/
-│   ├── scheduler.py         # 智能调度器（核心）
+│   ├── scheduler.py         # 智能调度器
 │   ├── analyzer.py          # 网站特征分析器
 │   └── fallback.py          # 并行竞争引擎
 ├── tools/
-│   ├── base.py              # 工具基类（统一接口）
 │   ├── requests_tool.py     # 轻量级 HTTP
 │   ├── curl_cffi_tool.py    # TLS 指纹伪装
 │   ├── nodriver_tool.py     # 终极反爬武器
@@ -238,193 +195,37 @@ scrapephantom/
 │   ├── detector.py          # 检测 Agent 和内置工具
 │   ├── configurator.py      # 自动配置技能
 │   └── cli.py               # 命令行工具
-├── profiles/
-│   ├── site_profiles.py     # 预定义网站特征库
-│   └── user_agents.py       # 真实 UA 池
-├── cache/
-│   └── manager.py           # 文件缓存管理
-├── proxy/
-│   └── manager.py           # 代理管理
-└── tests/
-    └── test_all.py          # 自测脚本
-```
-
----
-
-## 工具选择流程图
-
-```
-任务进入
-   │
-   ▼
-┌─────────────────────────────┐
-│  1. 检查缓存                │
-│  └── 命中 → 直接返回        │
-└─────────────┬───────────────┘
-              │
-              ▼
-┌─────────────────────────────┐
-│  2. 分析目标网站            │
-│  ├── 查询预定义特征库       │
-│  ├── 检测 Cloudflare 头     │
-│  ├── 检测 DataDome/Imperva  │
-│  └── 判断 JS 渲染需求       │
-└─────────────┬───────────────┘
-              │
-              ▼
-┌─────────────────────────────┐
-│  3. 并行竞争                │
-│  ├── 同时启动 4 个工具      │
-│  ├── 谁先成功 → 立即采纳    │
-│  └── 其他工具自动取消       │
-└─────────────┬───────────────┘
-              │
-              ▼
-┌─────────────────────────────┐
-│  4. 结果处理                │
-│  ├── 成功 → 缓存 + 返回     │
-│  └── 全部失败 → 返回错误    │
-└─────────────────────────────┘
-```
-
----
-
-## 配置说明
-
-编辑 `config.py`：
-
-```python
-# 缓存配置
-CACHE_DIR = ".cache"        # 缓存目录
-CACHE_TTL = 3600 * 24       # 缓存有效期（秒）
-
-# 请求配置
-DEFAULT_TIMEOUT = 15        # 默认超时（秒）
-
-# 代理配置
-PROXY_ENABLED = False       # 是否启用代理
-PROXY_LIST = []             # 代理列表
-```
-
----
-
-## Agent 集成指南
-
-### 一键自动配置（推荐）
-
-```bash
-# 检测当前 Agent 和内置抓取工具
-python -m smart_scraper.agent_hub detect
-
-# 自动配置技能（支持 OpenCode/Claude/Cursor）
-python -m smart_scraper.agent_hub configure
-
-# 查看配置状态
-python -m smart_scraper.agent_hub status
-```
-
-**自动配置会：**
-1. 检测你的 Agent 类型（OpenCode/Claude/Cursor/其他）
-2. 检测内置抓取工具（requests/httpx/aiohttp 等）
-3. 自动生成对应的技能配置
-4. 部署到正确位置
-
-### 智能触发规则
-
-当内置抓取工具遇到以下情况时，自动调用 ScrapePhantom 重试：
-
-1. 内置抓取工具返回错误或失败
-2. 抓取超时
-3. 内容不完整或被截断
-4. 需要绕过反爬保护（Cloudflare、DataDome等）
-5. 需要渲染 JavaScript 动态内容
-6. HTTP 状态码异常（403、429、503等）
-7. 返回内容为空或格式异常
-
-### 手动集成
-
-#### 方式1：直接替换内置工具
-
-```python
-from smart_scraper import scrape
-
-def fetch_url(url):
-    result = scrape(url, timeout=15)
-    return result.content if result.success else None
-```
-
-#### 方式2：作为降级备选
-
-```python
-from smart_scraper import scrape
-
-def fetch_with_fallback(url):
-    try:
-        return 内置工具.fetch(url)
-    except:
-        result = scrape(url)  # 自动降级
-        return result.content if result.success else None
-```
-
-### 不同 Agent 配置
-
-#### OpenCode
-
-自动配置会将 SKILL.md 放到 `~/.config/opencode/skills/scrapephantom/`。
-
-#### Claude / Cursor
-
-自动配置会修改 MCP 配置文件，注册 Scrapephantom 服务。
-
-#### 其他 Agent
-
-参考 `SKILL.md` 中的触发规则，在你的 Agent 工具调用逻辑中加入降级规则。
-
----
-
-## 运行测试
-
-```bash
-# 安装后运行自测
-python -m smart_scraper.tests.test_all
-
-# 或直接运行
-python smart_scraper/tests/test_all.py
+├── profiles/                # 网站特征库
+├── cache/                   # 缓存管理
+└── SKILL.md                 # OpenCode 技能配置
 ```
 
 ---
 
 ## 常见问题
 
-### Q: 安装 scrapling 报错？
+### Q: 和其他爬虫工具有什么区别？
 
-scrapling 依赖较多，如果安装失败可以尝试：
+| 对比项 | ScrapePhantom | 单一工具 |
+|--------|---------------|---------|
+| 工具数量 | 4 个并行 | 1 个 |
+| 失败处理 | 自动竞争 | 手动切换 |
+| Agent 集成 | 自动配置 | 无 |
+| 反爬绕过 | 全覆盖 | 部分 |
+
+### Q: 如何集成到我的 Agent？
 
 ```bash
-pip install "scrapling[all]" --no-build-isolation
+# 一键配置
+python -m smart_scraper.agent_hub configure
 ```
 
-### Q: nodriver 需要 Chrome 浏览器？
+### Q: 支持哪些 Agent？
 
-是的，nodriver 基于 Chromium 内核。确保系统已安装 Chrome/Chromium。
-
-### Q: 如何添加代理？
-
-```python
-from smart_scraper.core.scheduler import SmartScheduler
-
-scheduler = SmartScheduler(proxy="http://ip:port")
-result = await scheduler.scrape(url)
-```
+OpenCode、Claude Desktop、Cursor，以及任何支持 Python 的 Agent。
 
 ---
 
 ## License
 
 MIT License
-
----
-
-## 作者
-
-**ScrapePhantom** - 幽灵爬虫，让数据抓取不再困难。
